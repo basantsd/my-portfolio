@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
       network,
       amount,
       amountInEth,
+      isStakeToLearn,
+      blockchainEnrollmentId,
     } = await req.json()
 
     // Validate required fields
@@ -65,6 +67,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Calculate course end date for stake-to-learn courses
+    let courseEndDate = null
+    if (isStakeToLearn && course.durationDays) {
+      courseEndDate = new Date()
+      courseEndDate.setDate(courseEndDate.getDate() + course.durationDays)
+    }
+
     // Create enrollment with payment
     const enrollment = await db.courseEnrollment.create({
       data: {
@@ -72,6 +81,11 @@ export async function POST(req: NextRequest) {
         courseId: courseId,
         paymentMethod: "CRYPTO",
         transactionId: transactionHash,
+        isStakeToLearn: isStakeToLearn || false,
+        enrollmentId: blockchainEnrollmentId || null,
+        stakedAmount: isStakeToLearn ? amount.toString() : null,
+        stakedAmountEth: isStakeToLearn ? parseFloat(amountInEth) : null,
+        courseEndDate: courseEndDate,
         payment: {
           create: {
             walletAddress,

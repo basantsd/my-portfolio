@@ -95,22 +95,32 @@ model BlogPost {
 }
 
 model Course {
-  id          String             @id @default(cuid())
-  title       String
-  slug        String             @unique
-  description String
-  content     String             @db.Text
-  thumbnail   String
-  price       Float
-  isPremium   Boolean            @default(false)
-  published   Boolean            @default(false)
-  level       CourseLevel
-  duration    Int // in minutes
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  modules     CourseModule[]
-  sections    CourseSection[]
-  enrollments CourseEnrollment[]
+  id                    String             @id @default(cuid())
+  title                 String
+  slug                  String             @unique
+  description           String
+  content               String             @db.Text
+  thumbnail             String
+  price                 Float
+  isPremium             Boolean            @default(false)
+  published             Boolean            @default(false)
+  level                 CourseLevel
+  duration              Int                // in minutes
+
+  // Stake-to-learn configuration
+  isStakeToLearn        Boolean            @default(false)
+  stakeAmount           Float?             // Amount in ETH to stake
+  durationDays          Int?               // Course period in days (e.g., 90 for 3 months)
+  requiredCompletion    Int                @default(75) // Required completion percentage
+  requiredTestAverage   Int                @default(75) // Required test average
+  dailyLearningMinutes  Int                @default(60) // Required daily learning minutes
+
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  modules               CourseModule[]
+  sections              CourseSection[]
+  enrollments           CourseEnrollment[]
+  blockchainPayments    BlockchainPayment[]
 }
 
 model CourseModule {
@@ -224,18 +234,63 @@ model UserSectionProgress {
   @@unique([userId, sectionId])
 }
 
-model CourseEnrollment {
-  id              String              @id @default(cuid())
+// Track individual learning sessions for time-based tracking
+model LearningSession {
+  id              String           @id @default(cuid())
+  enrollmentId    String
   userId          String
   courseId        String
-  enrolledAt      DateTime            @default(now())
-  progress        Int                 @default(0)
-  completed       Boolean             @default(false)
-  paymentMethod   PaymentMethod       @default(FREE)
-  transactionId   String?             // Blockchain transaction ID if paid with crypto
-  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course          Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  payment         BlockchainPayment?
+  sectionId       String?          // Optional: which section was studied
+  topicId         String?          // Optional: which topic was studied
+  startTime       DateTime
+  endTime         DateTime?        // Null if session is still active
+  durationMinutes Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  enrollment      CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, courseId])
+  @@index([enrollmentId])
+}
+
+model CourseEnrollment {
+  id                    String              @id @default(cuid())
+  userId                String
+  courseId              String
+  enrolledAt            DateTime            @default(now())
+  progress              Int                 @default(0)
+  completed             Boolean             @default(false)
+  paymentMethod         PaymentMethod       @default(FREE)
+  transactionId         String?             // Blockchain transaction ID if paid with crypto
+
+  // Stake-to-learn fields
+  isStakeToLearn        Boolean             @default(false)
+  enrollmentId          String?             // Smart contract enrollment ID (bytes32)
+  stakedAmount          String?             // Amount in wei
+  stakedAmountEth       Float?              // Amount in ETH
+  courseEndDate         DateTime?           // When course period ends
+
+  // Refund status
+  refundEligible        Boolean             @default(false)
+  refundClaimed         Boolean             @default(false)
+  refundClaimedAt       DateTime?
+  adminClaimed          Boolean             @default(false)
+  adminClaimedAt        DateTime?
+
+  // Progress metrics (synced with smart contract)
+  completionPercentage  Int                 @default(0)
+  testAverage           Float               @default(0)
+  totalLearningMinutes  Int                 @default(0)
+
+  // Streak tracking
+  lastLearningDate      DateTime?
+  currentStreak         Int                 @default(0)
+  longestStreak         Int                 @default(0)
+
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course                Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  payment               BlockchainPayment?
+  learningSessions      LearningSession[]
 
   @@unique([userId, courseId])
 }
@@ -257,6 +312,7 @@ model BlockchainPayment {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   enrollment      CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Service {
