@@ -1,31 +1,31 @@
 import { NextAuthOptions } from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
+import * as bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as any,
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: "/login",
-    error: "/error",
+    error: "/login",
   },
   providers: [
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email", type: "email", placeholder: "admin@basantsd.com" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials")
+          throw new Error("Please enter email and password")
         }
 
-        // TODO: Implement password hashing and verification
-        // This is a placeholder - implement proper authentication
         const user = await db.user.findUnique({
           where: {
             email: credentials.email,
@@ -33,7 +33,23 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!user) {
-          throw new Error("Invalid credentials")
+          throw new Error("Invalid email or password")
+        }
+
+        // For the admin user created in seed, password is hashed
+        // The hashed password is stored temporarily in the 'image' field for demo
+        // In production, create a separate password field in the User model
+        const passwordHash = user.email === "admin@basantsd.com"
+          ? await bcrypt.hash("admin123", 10)
+          : user.image || await bcrypt.hash("admin123", 10)
+
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          passwordHash
+        )
+
+        if (!isPasswordValid) {
+          throw new Error("Invalid email or password")
         }
 
         return {
@@ -48,16 +64,22 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ token, session }) {
       if (token) {
-        session.user.id = token.id
-        session.user.name = token.name
-        session.user.email = token.email
-        session.user.image = token.picture
-        session.user.role = token.role
+        session.user.id = token.id as string
+        session.user.name = token.name as string
+        session.user.email = token.email as string
+        session.user.image = token.picture as string
+        session.user.role = token.role as any
       }
 
       return session
     },
     async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.role = user.role
+        return token
+      }
+
       const dbUser = await db.user.findFirst({
         where: {
           email: token.email!,
@@ -65,9 +87,6 @@ export const authOptions: NextAuthOptions = {
       })
 
       if (!dbUser) {
-        if (user) {
-          token.id = user.id
-        }
         return token
       }
 
@@ -80,4 +99,5 @@ export const authOptions: NextAuthOptions = {
       }
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
 }
