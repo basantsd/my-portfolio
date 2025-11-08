@@ -1,34 +1,51 @@
 # Prisma Client Generation Error Fix
 
 ## Issue
-The Prisma client hasn't been properly generated, causing 404 errors on all CRUD operations.
+The Prisma client hasn't been properly generated, causing 500 errors on all CRUD operations.
 
 Error: `@prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.`
 
-## Solution
+## Root Cause
+This environment cannot download Prisma engine binaries from binaries.prisma.sh due to network restrictions (403 Forbidden). The Prisma client requires these native binaries to function.
 
-Run these commands in your terminal **in this exact order**:
+## Solution for Local Development
+
+### Prerequisites
+1. Make sure you have a PostgreSQL database running
+2. Create a `.env` or `.env.local` file in the project root with your database connection:
+   ```
+   DATABASE_URL="postgresql://username:password@localhost:5432/portfolio_db?schema=public"
+   AUTH_SECRET="your-secret-key-here"  # Generate with: openssl rand -base64 32
+   ```
+
+### Fix Steps
+
+Run these commands in your **local terminal** (on a machine with unrestricted internet access) **in this exact order**:
 
 ```bash
-# Step 1: Clean everything
+# Step 1: Clean build artifacts
 rm -rf node_modules/.prisma
 rm -rf .next
 
-# Step 2: Set environment variable to ignore checksum errors
-export PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-
-# Step 3: Generate Prisma client
+# Step 2: Generate Prisma client (requires internet to download engines)
 npx prisma generate
 
-# Step 4: If step 3 fails, try with database push
+# Step 3: Push schema to database
 npx prisma db push
 
-# Step 5: Run seed to populate database
+# Step 4: Seed the database with sample data
 npm run db:seed
 
-# Step 6: Start the dev server
+# Step 5: Start the dev server
 npm run dev
 ```
+
+### What This Does:
+- **Step 1**: Removes old generated client files
+- **Step 2**: Downloads Prisma engine binaries and generates type-safe database client
+- **Step 3**: Syncs your database schema with prisma/schema.prisma
+- **Step 4**: Populates database with projects, blog posts, courses, and admin user
+- **Step 5**: Starts Next.js development server on http://localhost:3000
 
 ## Alternative: If Network Issues Persist
 
