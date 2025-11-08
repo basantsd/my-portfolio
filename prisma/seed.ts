@@ -631,6 +631,341 @@ contract SimpleStorage {
 
   console.log('✅ Courses seeded')
 
+  // Create section-based course with tests
+  const sectionCourse = await prisma.course.upsert({
+    where: { slug: 'web3-fundamentals' },
+    update: {},
+    create: {
+      title: 'Web3 Fundamentals with Progressive Learning',
+      slug: 'web3-fundamentals',
+      description: 'Master Web3 development with our progressive learning system. Complete tests to unlock new sections and earn your NFT certificate.',
+      content: JSON.stringify({
+        features: [
+          'Progressive section unlock system',
+          'Interactive tests after each section',
+          'Hands-on coding exercises',
+          'NFT certificate upon completion',
+          'Real-world project portfolio',
+        ],
+        learningOutcomes: [
+          'Understand blockchain and Web3 fundamentals',
+          'Write and deploy smart contracts',
+          'Build decentralized applications',
+          'Connect with MetaMask and Web3 providers',
+          'Master testing and security best practices',
+        ],
+        requirements: [
+          'Basic JavaScript knowledge',
+          'Familiarity with React',
+          'MetaMask wallet installed',
+        ],
+        includes: [
+          '50 video lessons (15+ hours)',
+          'Section completion tests',
+          'Downloadable resources',
+          'NFT certificate',
+          'Lifetime access',
+        ],
+      }),
+      thumbnail: 'https://images.unsplash.com/photo-1639322537228-f564d14b456a?w=1200&h=600&fit=crop',
+      price: 49,
+      isPremium: false,
+      published: true,
+      level: 'BEGINNER',
+      duration: 900,
+    },
+  })
+
+  // Section 1: Introduction (No test, always unlocked)
+  const section1 = await prisma.courseSection.create({
+    data: {
+      courseId: sectionCourse.id,
+      title: 'Introduction to Web3',
+      description: 'Get started with Web3 and blockchain basics',
+      order: 0,
+      requireTest: false,
+      topics: {
+        create: [
+          {
+            title: 'Welcome to Web3',
+            description: 'Course overview and what you\'ll build',
+            videoUrl: 'https://example.com/web3-intro.mp4',
+            duration: 10,
+            order: 0,
+            isFree: true,
+          },
+          {
+            title: 'Blockchain Basics',
+            description: 'Understanding how blockchain technology works',
+            videoUrl: 'https://example.com/blockchain-basics.mp4',
+            duration: 15,
+            order: 1,
+            isFree: true,
+          },
+          {
+            title: 'Setting Up Your Environment',
+            description: 'Install MetaMask, Node.js, and development tools',
+            videoUrl: 'https://example.com/setup.mp4',
+            duration: 12,
+            order: 2,
+            isFree: false,
+          },
+        ],
+      },
+    },
+  })
+
+  // Section 2: Smart Contracts (Requires test to unlock next)
+  const section2 = await prisma.courseSection.create({
+    data: {
+      courseId: sectionCourse.id,
+      title: 'Smart Contracts with Solidity',
+      description: 'Learn to write and deploy smart contracts',
+      order: 1,
+      requireTest: true,
+      topics: {
+        create: [
+          {
+            title: 'Introduction to Solidity',
+            description: 'Solidity syntax and basic concepts',
+            videoUrl: 'https://example.com/solidity-intro.mp4',
+            duration: 20,
+            order: 0,
+            isFree: false,
+          },
+          {
+            title: 'Data Types and Variables',
+            description: 'Working with different data types in Solidity',
+            videoUrl: 'https://example.com/data-types.mp4',
+            duration: 18,
+            order: 1,
+            isFree: false,
+          },
+          {
+            title: 'Functions and Modifiers',
+            description: 'Creating functions and access control',
+            videoUrl: 'https://example.com/functions.mp4',
+            duration: 22,
+            order: 2,
+            isFree: false,
+          },
+          {
+            title: 'Your First Contract',
+            description: 'Deploy your first smart contract to testnet',
+            videoUrl: 'https://example.com/first-contract.mp4',
+            duration: 25,
+            order: 3,
+            isFree: false,
+          },
+        ],
+      },
+      test: {
+        create: {
+          title: 'Solidity Fundamentals Quiz',
+          description: 'Test your understanding of Solidity basics. You need 70% to unlock the next section.',
+          passingScore: 70,
+          timeLimit: 15,
+          questions: {
+            create: [
+              {
+                question: 'Which keyword is used to declare a state variable that can be changed?',
+                explanation: 'State variables without the "constant" or "immutable" keyword can be changed after deployment.',
+                order: 0,
+                points: 1,
+                answers: {
+                  create: [
+                    { answer: 'var', isCorrect: false, order: 0 },
+                    { answer: 'let', isCorrect: false, order: 1 },
+                    { answer: 'No special keyword needed', isCorrect: true, order: 2 },
+                    { answer: 'mutable', isCorrect: false, order: 3 },
+                  ],
+                },
+              },
+              {
+                question: 'What is the visibility of a function that can only be called from within the contract?',
+                explanation: 'Private functions can only be called from within the same contract, not from derived contracts or externally.',
+                order: 1,
+                points: 1,
+                answers: {
+                  create: [
+                    { answer: 'public', isCorrect: false, order: 0 },
+                    { answer: 'private', isCorrect: true, order: 1 },
+                    { answer: 'internal', isCorrect: false, order: 2 },
+                    { answer: 'external', isCorrect: false, order: 3 },
+                  ],
+                },
+              },
+              {
+                question: 'Which of the following are valid Solidity data types? (Select all that apply)',
+                explanation: 'Solidity supports uint (unsigned integer), address (Ethereum address), bool (boolean), and string types.',
+                order: 2,
+                points: 2,
+                answers: {
+                  create: [
+                    { answer: 'uint', isCorrect: true, order: 0 },
+                    { answer: 'address', isCorrect: true, order: 1 },
+                    { answer: 'float', isCorrect: false, order: 2 },
+                    { answer: 'bool', isCorrect: true, order: 3 },
+                    { answer: 'string', isCorrect: true, order: 4 },
+                  ],
+                },
+              },
+              {
+                question: 'What does the "payable" modifier do?',
+                explanation: 'The payable modifier allows a function to receive Ether when called.',
+                order: 3,
+                points: 1,
+                answers: {
+                  create: [
+                    { answer: 'Allows the function to receive Ether', isCorrect: true, order: 0 },
+                    { answer: 'Makes the function public', isCorrect: false, order: 1 },
+                    { answer: 'Prevents reentrancy attacks', isCorrect: false, order: 2 },
+                    { answer: 'Reduces gas costs', isCorrect: false, order: 3 },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  })
+
+  // Section 3: DApp Development (Requires test to unlock next)
+  const section3 = await prisma.courseSection.create({
+    data: {
+      courseId: sectionCourse.id,
+      title: 'Building Decentralized Applications',
+      description: 'Connect your smart contracts to a React frontend',
+      order: 2,
+      requireTest: true,
+      topics: {
+        create: [
+          {
+            title: 'Web3.js vs Ethers.js',
+            description: 'Choosing the right Web3 library',
+            videoUrl: 'https://example.com/web3-libraries.mp4',
+            duration: 15,
+            order: 0,
+            isFree: false,
+          },
+          {
+            title: 'Connecting to MetaMask',
+            description: 'Integrate MetaMask wallet into your app',
+            videoUrl: 'https://example.com/metamask.mp4',
+            duration: 20,
+            order: 1,
+            isFree: false,
+          },
+          {
+            title: 'Reading Contract Data',
+            description: 'Call view and pure functions from frontend',
+            videoUrl: 'https://example.com/read-data.mp4',
+            duration: 18,
+            order: 2,
+            isFree: false,
+          },
+          {
+            title: 'Sending Transactions',
+            description: 'Execute transactions and handle events',
+            videoUrl: 'https://example.com/transactions.mp4',
+            duration: 22,
+            order: 3,
+            isFree: false,
+          },
+        ],
+      },
+      test: {
+        create: {
+          title: 'DApp Development Quiz',
+          description: 'Test your knowledge of Web3 frontend integration',
+          passingScore: 70,
+          timeLimit: 10,
+          questions: {
+            create: [
+              {
+                question: 'Which method is used to read data from a smart contract without spending gas?',
+                explanation: 'View and pure functions can be called without creating a transaction, so no gas is required.',
+                order: 0,
+                points: 1,
+                answers: {
+                  create: [
+                    { answer: 'contract.methods.myMethod().send()', isCorrect: false, order: 0 },
+                    { answer: 'contract.methods.myMethod().call()', isCorrect: true, order: 1 },
+                    { answer: 'contract.methods.myMethod().execute()', isCorrect: false, order: 2 },
+                  ],
+                },
+              },
+              {
+                question: 'What does MetaMask provide to your DApp?',
+                explanation: 'MetaMask acts as a Web3 provider and manages user accounts and transaction signing.',
+                order: 1,
+                points: 2,
+                answers: {
+                  create: [
+                    { answer: 'Web3 provider', isCorrect: true, order: 0 },
+                    { answer: 'User account management', isCorrect: true, order: 1 },
+                    { answer: 'Transaction signing', isCorrect: true, order: 2 },
+                    { answer: 'Smart contract deployment', isCorrect: false, order: 3 },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  })
+
+  // Section 4: Final Project (No test required, it's the last section)
+  const section4 = await prisma.courseSection.create({
+    data: {
+      courseId: sectionCourse.id,
+      title: 'Build Your Portfolio Project',
+      description: 'Create a complete DApp from scratch',
+      order: 3,
+      requireTest: false,
+      topics: {
+        create: [
+          {
+            title: 'Project Planning',
+            description: 'Plan your DApp architecture and features',
+            videoUrl: 'https://example.com/project-planning.mp4',
+            duration: 15,
+            order: 0,
+            isFree: false,
+          },
+          {
+            title: 'Smart Contract Development',
+            description: 'Build and test your smart contracts',
+            videoUrl: 'https://example.com/project-contracts.mp4',
+            duration: 30,
+            order: 1,
+            isFree: false,
+          },
+          {
+            title: 'Frontend Development',
+            description: 'Create the user interface',
+            videoUrl: 'https://example.com/project-frontend.mp4',
+            duration: 35,
+            order: 2,
+            isFree: false,
+          },
+          {
+            title: 'Deployment & Testing',
+            description: 'Deploy to testnet and production',
+            videoUrl: 'https://example.com/deployment.mp4',
+            duration: 25,
+            order: 3,
+            isFree: false,
+          },
+        ],
+      },
+    },
+  })
+
+  console.log('✅ Section-based course with tests seeded')
+
   // Create services
   await prisma.service.deleteMany() // Clear existing services
   const services = [
