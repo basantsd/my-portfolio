@@ -1,11 +1,9 @@
-import { NextAuthOptions } from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import * as bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db) as any,
+export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -26,9 +24,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Please enter email and password")
         }
 
+        const email = credentials.email as string
+        const password = credentials.password as string
+
         const user = await db.user.findUnique({
           where: {
-            email: credentials.email,
+            email: email,
           },
         })
 
@@ -44,7 +45,7 @@ export const authOptions: NextAuthOptions = {
           : user.image || await bcrypt.hash("admin123", 10)
 
         const isPasswordValid = await bcrypt.compare(
-          credentials.password,
+          password,
           passwordHash
         )
 
@@ -100,4 +101,4 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+})

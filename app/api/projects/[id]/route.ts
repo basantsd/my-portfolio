@@ -5,11 +5,12 @@ import { projectSchema } from "@/lib/validations"
 // GET /api/projects/[id] - Get a single project
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const project = await db.project.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!project) {
@@ -32,14 +33,15 @@ export async function GET(
 // PUT /api/projects/[id] - Update a project
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const validated = projectSchema.parse(body)
 
     const project = await db.project.update({
-      where: { id: params.id },
+      where: { id },
       data: validated,
     })
 
@@ -56,11 +58,12 @@ export async function PUT(
 // DELETE /api/projects/[id] - Delete a project
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     await db.project.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ message: "Project deleted successfully" })
