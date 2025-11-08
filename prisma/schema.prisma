@@ -68,6 +68,7 @@ model Project {
   description String
   content     String        @db.Text
   image       String
+  images      String[]      @default([])
   tags        String[]
   githubUrl   String?
   liveUrl     String?
