@@ -1,5 +1,6 @@
 "use client"
 
+import { use, useState } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -24,7 +25,6 @@ import {
   MessageCircle,
   Share2
 } from "lucide-react"
-import { useState } from "react"
 
 // Sample course data (in production, this would come from a database)
 const courses = [
@@ -268,8 +268,9 @@ const reviews = [
   }
 ]
 
-export default function CoursePage({ params }: { params: { slug: string } }) {
-  const course = courses.find(c => c.slug === params.slug)
+export default function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
+  const course = courses.find(c => c.slug === slug)
   const [expandedModules, setExpandedModules] = useState<number[]>([])
 
   if (!course) {
