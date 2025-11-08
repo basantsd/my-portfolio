@@ -225,16 +225,38 @@ model UserSectionProgress {
 }
 
 model CourseEnrollment {
-  id         String   @id @default(cuid())
-  userId     String
-  courseId   String
-  enrolledAt DateTime @default(now())
-  progress   Int      @default(0)
-  completed  Boolean  @default(false)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id              String              @id @default(cuid())
+  userId          String
+  courseId        String
+  enrolledAt      DateTime            @default(now())
+  progress        Int                 @default(0)
+  completed       Boolean             @default(false)
+  paymentMethod   PaymentMethod       @default(FREE)
+  transactionId   String?             // Blockchain transaction ID if paid with crypto
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course          Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  payment         BlockchainPayment?
 
   @@unique([userId, courseId])
+}
+
+model BlockchainPayment {
+  id              String           @id @default(cuid())
+  enrollmentId    String           @unique
+  walletAddress   String
+  transactionHash String           @unique
+  amount          String           // Amount in wei as string to avoid precision issues
+  amountInEth     Float            // Human-readable amount in ETH
+  courseId        String
+  courseName      String
+  purchaseId      String?          // Smart contract purchase ID
+  status          PaymentStatus    @default(PENDING)
+  network         String           @default("sepolia") // ethereum, sepolia, polygon, etc.
+  blockNumber     Int?
+  confirmedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  enrollment      CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
 }
 
 model Service {
@@ -305,4 +327,17 @@ enum SubscriptionStatus {
   ACTIVE
   CANCELED
   EXPIRED
+}
+
+enum PaymentMethod {
+  FREE
+  CRYPTO
+  FIAT
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REFUNDED
 }
