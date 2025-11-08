@@ -109,6 +109,7 @@ model Course {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   modules     CourseModule[]
+  sections    CourseSection[]
   enrollments CourseEnrollment[]
 }
 
@@ -131,6 +132,96 @@ model Lesson {
   order       Int
   isFree      Boolean      @default(false)
   module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}
+
+// New Section-based structure with tests
+model CourseSection {
+  id          String               @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  order       Int
+  requireTest Boolean              @default(false) // Whether this section requires test completion to unlock next
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  course      Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topics      SectionTopic[]
+  test        SectionTest?
+  progress    UserSectionProgress[]
+}
+
+model SectionTopic {
+  id          String        @id @default(cuid())
+  sectionId   String
+  title       String
+  description String?
+  videoUrl    String
+  duration    Int // in minutes
+  order       Int
+  isFree      Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  section     CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+}
+
+model SectionTest {
+  id               String           @id @default(cuid())
+  sectionId        String           @unique
+  title            String
+  description      String?
+  passingScore     Int              @default(70) // Percentage required to pass
+  timeLimit        Int?             // in minutes, null means no limit
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  section          CourseSection    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  questions        TestQuestion[]
+  attempts         UserTestAttempt[]
+}
+
+model TestQuestion {
+  id          String         @id @default(cuid())
+  testId      String
+  question    String         @db.Text
+  explanation String?        @db.Text
+  order       Int
+  points      Int            @default(1)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  test        SectionTest    @relation(fields: [testId], references: [id], onDelete: Cascade)
+  answers     QuestionAnswer[]
+}
+
+model QuestionAnswer {
+  id         String       @id @default(cuid())
+  questionId String
+  answer     String       @db.Text
+  isCorrect  Boolean      @default(false)
+  order      Int
+  createdAt  DateTime     @default(now())
+  question   TestQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model UserTestAttempt {
+  id          String      @id @default(cuid())
+  userId      String
+  testId      String
+  score       Int         // Percentage score
+  passed      Boolean     @default(false)
+  answers     Json        // Store user's answers and whether they were correct
+  completedAt DateTime    @default(now())
+  test        SectionTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
+
+model UserSectionProgress {
+  id          String        @id @default(cuid())
+  userId      String
+  sectionId   String
+  unlocked    Boolean       @default(false)
+  completed   Boolean       @default(false)
+  completedAt DateTime?
+  section     CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sectionId])
 }
 
 model CourseEnrollment {
