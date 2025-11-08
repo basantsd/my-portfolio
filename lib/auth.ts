@@ -75,29 +75,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session
     },
     async jwt({ token, user }) {
+      // Store user data in token on initial sign in
       if (user) {
         token.id = user.id
         token.role = user.role
-        return token
       }
 
-      const dbUser = await db.user.findFirst({
-        where: {
-          email: token.email!,
-        },
-      })
-
-      if (!dbUser) {
-        return token
-      }
-
-      return {
-        id: dbUser.id,
-        name: dbUser.name,
-        email: dbUser.email,
-        picture: dbUser.image,
-        role: dbUser.role,
-      }
+      return token
     },
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
