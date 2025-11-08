@@ -95,7 +95,15 @@ export default function CoursesClient({ courses }: CoursesClientProps) {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredCourses.map((course) => {
             const totalLessons = calculateTotalLessons(course)
-            const features = course.content ? JSON.parse(course.content).features || [] : []
+            let features: string[] = []
+            try {
+              if (course.content) {
+                const parsed = JSON.parse(course.content)
+                features = parsed.features || []
+              }
+            } catch (error) {
+              console.error('Failed to parse course content:', error)
+            }
 
             return (
               <Card key={course.id} className="group flex flex-col overflow-hidden hover:shadow-lg">
