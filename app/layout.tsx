@@ -4,6 +4,7 @@ import "./animations.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Web3Provider } from "@/components/providers/web3-provider";
+import { SessionProvider } from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: "Basant Singh Dobal - Blockchain Developer & Smart Contract Engineer",
@@ -19,13 +20,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <Web3Provider>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-        </Web3Provider>
+        <SessionProvider>
+          <Web3Provider>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </Web3Provider>
+        </SessionProvider>
       </body>
     </html>
   );
