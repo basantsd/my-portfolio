@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PurchaseWithCryptoButton } from "@/components/course/purchase-with-crypto-button"
 import {
   Clock,
   Users,
@@ -153,15 +154,22 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
                 <CardContent className="p-6">
                   <div className="mb-6">
                     <div className="mb-2 text-3xl font-bold">${course.price}</div>
-                    <div className="text-sm text-muted-foreground">One-time payment, lifetime access</div>
+                    <div className="text-sm text-muted-foreground">
+                      One-time payment, lifetime access
+                    </div>
+                    <div className="mt-2 text-lg font-semibold text-blue-600">
+                      Or pay {(course.price / 3000).toFixed(4)} ETH
+                    </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Button size="lg" className="w-full">
-                      Enroll Now
-                    </Button>
+                    <PurchaseWithCryptoButton
+                      courseId={course.id}
+                      courseName={course.title}
+                      priceInEth={parseFloat((course.price / 3000).toFixed(4))}
+                    />
                     <Button size="lg" variant="outline" className="w-full">
-                      Add to Cart
+                      Buy with Card (Coming Soon)
                     </Button>
                   </div>
 
