@@ -9,7 +9,7 @@ export default async function UserProfilePage() {
   const session = await auth()
 
   if (!session) {
-    redirect("/login?callbackUrl=/profile")
+    redirect("/login?callbackUrl=/settings")
   }
 
   const user = await db.user.findUnique({
