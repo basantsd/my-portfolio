@@ -36,10 +36,13 @@ export function Navbar() {
   }, [pathname])
 
   const isActive = (href: string) => {
+    // Exact match for home
     if (href === "/") {
-      return pathname === "/"
+      return pathname === "/" || pathname === ""
     }
-    return pathname.startsWith(href)
+    // For other routes, check if pathname includes the route
+    // This handles both /about and /(public)/about
+    return pathname === href || pathname.includes(href)
   }
 
   return (
@@ -86,7 +89,12 @@ export function Navbar() {
               </Link>
             ))}
             <div className="ml-2 flex items-center gap-2">
-              <Button variant="default" size="sm" asChild className="shadow-sm">
+              <Button
+                variant="default"
+                size="sm"
+                asChild
+                className="shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all hover:scale-105"
+              >
                 <Link href="/contact">
                   <Sparkles className="mr-2 h-4 w-4" />
                   Hire Me
