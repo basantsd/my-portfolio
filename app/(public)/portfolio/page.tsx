@@ -18,7 +18,7 @@ const projects = [
     githubUrl: "#",
     liveUrl: "#",
     status: "COMPLETED" as const,
-    image: "https://via.placeholder.com/400x300",
+    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=600&fit=crop",
   },
   {
     id: "2",
@@ -29,7 +29,7 @@ const projects = [
     githubUrl: "#",
     liveUrl: "#",
     status: "COMPLETED" as const,
-    image: "https://via.placeholder.com/400x300",
+    image: "https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?w=800&h=600&fit=crop",
   },
   {
     id: "3",
@@ -40,7 +40,7 @@ const projects = [
     githubUrl: "#",
     liveUrl: "#",
     status: "IN_PROGRESS" as const,
-    image: "https://via.placeholder.com/400x300",
+    image: "https://images.unsplash.com/photo-1639322537228-f710d846310a?w=800&h=600&fit=crop",
   },
   {
     id: "4",
@@ -51,7 +51,7 @@ const projects = [
     githubUrl: "#",
     liveUrl: "#",
     status: "COMPLETED" as const,
-    image: "https://via.placeholder.com/400x300",
+    image: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=800&h=600&fit=crop",
   },
   {
     id: "5",
@@ -62,7 +62,7 @@ const projects = [
     githubUrl: "#",
     liveUrl: "#",
     status: "COMPLETED" as const,
-    image: "https://via.placeholder.com/400x300",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop",
   },
   {
     id: "6",
@@ -73,7 +73,7 @@ const projects = [
     githubUrl: "#",
     liveUrl: "#",
     status: "UPCOMING" as const,
-    image: "https://via.placeholder.com/400x300",
+    image: "https://images.unsplash.com/photo-1633265486064-086b219458ec?w=800&h=600&fit=crop",
   },
 ]
 
