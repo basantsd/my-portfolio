@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PurchaseWithCryptoButton } from "@/components/course/purchase-with-crypto-button"
+import { FreeEnrollButton } from "@/components/course/free-enroll-button"
 import {
   Clock,
   Users,
@@ -35,9 +35,10 @@ type CourseWithRelations = Course & {
 
 interface CourseDetailClientProps {
   course: CourseWithRelations
+  isEnrolled: boolean
 }
 
-export default function CourseDetailClient({ course }: CourseDetailClientProps) {
+export default function CourseDetailClient({ course, isEnrolled }: CourseDetailClientProps) {
   const [expandedModules, setExpandedModules] = useState<string[]>([])
 
   const toggleModule = (moduleId: string) => {
@@ -153,30 +154,24 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
 
                 <CardContent className="p-6">
                   <div className="mb-6">
-                    <div className="mb-2 text-3xl font-bold">${course.price}</div>
+                    <div className="mb-2 text-3xl font-bold">Free</div>
                     <div className="text-sm text-muted-foreground">
-                      One-time payment, lifetime access
-                    </div>
-                    <div className="mt-2 text-lg font-semibold text-blue-600">
-                      Or pay {(course.price / 3000).toFixed(4)} ETH
+                      Full course access, lifetime
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <PurchaseWithCryptoButton
+                    <FreeEnrollButton
                       courseId={course.id}
                       courseName={course.title}
-                      priceInEth={parseFloat((course.price / 3000).toFixed(4))}
+                      enrolled={isEnrolled}
                     />
-                    <Button size="lg" variant="outline" className="w-full">
-                      Buy with Card (Coming Soon)
-                    </Button>
                   </div>
 
                   <div className="mt-6 space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />
-                      30-day money-back guarantee
+                      No payment required
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />
@@ -396,13 +391,14 @@ export default function CourseDetailClient({ course }: CourseDetailClientProps) 
             <p className="mb-8 text-lg text-muted-foreground">
               Join {course._count.enrollments.toLocaleString()}+ students already learning {course.title}
             </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg">
-                Enroll for ${course.price}
-              </Button>
-              <Button size="lg" variant="outline">
-                Try Free Preview
-              </Button>
+            <div className="flex justify-center">
+              <div className="w-full max-w-md">
+                <FreeEnrollButton
+                  courseId={course.id}
+                  courseName={course.title}
+                  enrolled={isEnrolled}
+                />
+              </div>
             </div>
           </div>
         </div>
