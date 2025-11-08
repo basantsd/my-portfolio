@@ -37,14 +37,58 @@ export async function PATCH(
 
     const { id } = await params
     const data = await req.json()
+    const { modules, ...courseData } = data
 
-    const course = await db.course.update({
-      where: { id },
-      data
-    })
+    // If modules are provided, delete existing ones and recreate
+    if (modules) {
+      // Delete all existing modules (cascade will delete lessons)
+      await db.courseModule.deleteMany({
+        where: { courseId: id }
+      })
 
-    return NextResponse.json(course)
+      // Update course with new modules
+      const course = await db.course.update({
+        where: { id },
+        data: {
+          ...courseData,
+          modules: {
+            create: modules.map((module: any) => ({
+              title: module.title,
+              order: module.order,
+              lessons: {
+                create: module.lessons.map((lesson: any) => ({
+                  title: lesson.title,
+                  description: lesson.description,
+                  videoUrl: lesson.videoUrl,
+                  duration: lesson.duration,
+                  order: lesson.order,
+                  isFree: lesson.isFree
+                }))
+              }
+            }))
+          }
+        },
+        include: {
+          modules: {
+            include: {
+              lessons: true
+            }
+          }
+        }
+      })
+
+      return NextResponse.json(course)
+    } else {
+      // Just update course data without touching modules
+      const course = await db.course.update({
+        where: { id },
+        data: courseData
+      })
+
+      return NextResponse.json(course)
+    }
   } catch (error) {
+    console.error("Error updating course:", error)
     return NextResponse.json({ error: "Failed to update course" }, { status: 500 })
   }
 }
