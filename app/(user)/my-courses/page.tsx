@@ -9,7 +9,7 @@ export default async function UserDashboardPage() {
   const session = await auth()
 
   if (!session) {
-    redirect("/login?callbackUrl=/dashboard")
+    redirect("/login?callbackUrl=/my-courses")
   }
 
   // Get user's enrolled courses with progress

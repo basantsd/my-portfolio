@@ -135,15 +135,15 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="cursor-pointer">
+                      <Link href="/my-courses" className="cursor-pointer">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
+                        <span>My Courses</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
+                      <Link href="/settings" className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
+                        <span>Settings</span>
                       </Link>
                     </DropdownMenuItem>
                     {session.user.role === "ADMIN" && (
@@ -227,18 +227,18 @@ export function Navbar() {
                   </div>
                 </div>
                 <Link
-                  href="/dashboard"
+                  href="/my-courses"
                   className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg flex items-center"
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
+                  My Courses
                 </Link>
                 <Link
-                  href="/profile"
+                  href="/settings"
                   className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg flex items-center"
                 >
                   <User className="mr-2 h-4 w-4" />
-                  Profile
+                  Settings
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
