@@ -46,14 +46,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: {
             email: email,
           },
+          include: {
+            accounts: true,
+          },
         })
 
         if (!user) {
           throw new Error("Invalid email or password")
         }
 
+        // Check if user only has OAuth accounts
         if (!user.password) {
-          throw new Error("Please login with your social account")
+          const oauthProviders = user.accounts
+            .map((acc) => acc.provider)
+            .filter((p) => p !== "credentials")
+            .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+            .join(" or ")
+
+          if (oauthProviders) {
+            throw new Error(`This email is registered with ${oauthProviders}. Please use that to login.`)
+          }
+          throw new Error("Invalid email or password")
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password)
@@ -62,8 +75,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Invalid email or password")
         }
 
-        // Check if email is verified for credential signups
-        if (!user.emailVerified) {
+        // Check if email is verified for credential signups (skip for OAuth users)
+        if (!user.emailVerified && user.accounts.length === 0) {
           throw new Error("Please verify your email before logging in")
         }
 
