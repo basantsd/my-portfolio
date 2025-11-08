@@ -14,7 +14,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Mail,
+  Send
 } from "lucide-react"
 import { useState } from "react"
 
@@ -38,6 +40,16 @@ const navigation = [
     name: "Courses",
     href: "/dashboard/courses",
     icon: GraduationCap,
+  },
+  {
+    name: "Contact Messages",
+    href: "/dashboard/contacts",
+    icon: Mail,
+  },
+  {
+    name: "Newsletter",
+    href: "/dashboard/newsletter",
+    icon: Send,
   },
   {
     name: "Settings",

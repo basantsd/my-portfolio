@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Github, Twitter, Linkedin, Mail } from "lucide-react"
+import { NewsletterForm } from "@/components/forms/newsletter-form"
 
 const footerLinks = {
   product: [
@@ -94,19 +95,7 @@ export function Footer() {
             <p className="text-sm text-muted-foreground mb-4">
               Subscribe to get the latest updates and insights.
             </p>
-            <form className="space-y-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full px-3 py-2 border rounded-md text-sm"
-              />
-              <button
-                type="submit"
-                className="w-full px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
 

@@ -1,43 +1,8 @@
-"use client"
-
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
+import { ContactForm } from "@/components/forms/contact-form"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Mail, MapPin, Phone } from "lucide-react"
-import { contactFormSchema, type ContactFormData } from "@/lib/validations"
 
 export default function ContactPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactFormSchema),
-  })
-
-  const onSubmit = async (data: ContactFormData) => {
-    setIsSubmitting(true)
-    try {
-      // TODO: Implement API call
-      console.log("Form data:", data)
-      alert("Message sent successfully!")
-      reset()
-    } catch (error) {
-      console.error("Error sending message:", error)
-      alert("Failed to send message. Please try again.")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-12 text-center">
@@ -49,71 +14,7 @@ export default function ContactPage() {
 
       <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
         {/* Contact Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Send a Message</CardTitle>
-            <CardDescription>
-              Fill out the form below and I'll get back to you as soon as possible.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Your name"
-                  {...register("name")}
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  {...register("email")}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="subject">Subject</Label>
-                <Input
-                  id="subject"
-                  placeholder="What is this about?"
-                  {...register("subject")}
-                />
-                {errors.subject && (
-                  <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  placeholder="Tell me about your project..."
-                  rows={5}
-                  {...register("message")}
-                />
-                {errors.message && (
-                  <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>
-                )}
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Sending..." : "Send Message"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <ContactForm />
 
         {/* Contact Information */}
         <div className="space-y-6">
