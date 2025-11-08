@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Clock, Users, Star, Play, CheckCircle, BookOpen } from "lucide-react"
+import { Clock, Users, Star, Play, BookOpen } from "lucide-react"
 import type { Course, CourseModule, Lesson, CourseLevel } from "@prisma/client"
 
 type CourseWithRelations = Course & {
@@ -95,15 +95,6 @@ export default function CoursesClient({ courses }: CoursesClientProps) {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredCourses.map((course) => {
             const totalLessons = calculateTotalLessons(course)
-            let features: string[] = []
-            try {
-              if (course.content) {
-                const parsed = JSON.parse(course.content)
-                features = parsed.features || []
-              }
-            } catch (error) {
-              console.error('Failed to parse course content:', error)
-            }
 
             return (
               <Card key={course.id} className="group flex flex-col overflow-hidden hover:shadow-lg">
@@ -153,16 +144,7 @@ export default function CoursesClient({ courses }: CoursesClientProps) {
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    {features.slice(0, 3).map((feature: string, index: number) => (
-                      <div key={index} className="flex items-start gap-2 text-xs">
-                        <CheckCircle className="mt-0.5 h-3 w-3 flex-shrink-0 text-primary" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between border-t pt-4">
+                  <div className="flex items-center justify-between pt-4">
                     <span className="text-2xl font-bold">${course.price}</span>
                     <Button asChild>
                       <Link href={`/courses/${course.slug}`}>Enroll Now</Link>
