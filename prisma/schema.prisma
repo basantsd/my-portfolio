@@ -1,0 +1,216 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  subscriptions Subscription[]
+  enrollments   CourseEnrollment[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  description String
+  content     String        @db.Text
+  image       String
+  tags        String[]
+  githubUrl   String?
+  liveUrl     String?
+  featured    Boolean       @default(false)
+  status      ProjectStatus @default(COMPLETED)
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model BlogPost {
+  id         String   @id @default(cuid())
+  title      String
+  slug       String   @unique
+  excerpt    String
+  content    String   @db.Text
+  coverImage String
+  tags       String[]
+  published  Boolean  @default(false)
+  views      Int      @default(0)
+  readTime   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Course {
+  id          String             @id @default(cuid())
+  title       String
+  slug        String             @unique
+  description String
+  content     String             @db.Text
+  thumbnail   String
+  price       Float
+  isPremium   Boolean            @default(false)
+  published   Boolean            @default(false)
+  level       CourseLevel
+  duration    Int // in minutes
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  modules     CourseModule[]
+  enrollments CourseEnrollment[]
+}
+
+model CourseModule {
+  id       String   @id @default(cuid())
+  courseId String
+  title    String
+  order    Int
+  lessons  Lesson[]
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Lesson {
+  id          String       @id @default(cuid())
+  moduleId    String
+  title       String
+  description String?
+  videoUrl    String
+  duration    Int
+  order       Int
+  isFree      Boolean      @default(false)
+  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}
+
+model CourseEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime @default(now())
+  progress   Int      @default(0)
+  completed  Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  features    String[]
+  price       String?
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Subscription {
+  id     String             @id @default(cuid())
+  userId String
+  plan   Plan
+  status SubscriptionStatus
+  startDate DateTime
+  endDate   DateTime
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Newsletter {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribed   Boolean  @default(true)
+  subscribedAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  COMPLETED
+  UPCOMING
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Plan {
+  FREE
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
