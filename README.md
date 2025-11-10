@@ -133,6 +133,11 @@ npx prisma generate
 
 # Run migrations (when database is available)
 npx prisma migrate dev --name init
+
+# Seed the database with initial data (including admin user)
+npx tsx prisma/seed.ts
+# OR if tsx is not installed globally:
+npm run db:seed
 ```
 
 5. **Run development server**
@@ -141,6 +146,26 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 🔐 Admin Access
+
+After seeding the database, you can access the admin panel:
+
+- **Admin Login URL**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+- **Email**: `admin@basantsd.com`
+- **Password**: `admin123`
+
+**⚠️ IMPORTANT**: Change the admin password immediately after first login!
+
+**Note**: If you encounter "Invalid email or password" error:
+1. Make sure you've run the database seed command: `npx tsx prisma/seed.ts`
+2. Verify your database connection in `.env.local`
+3. Check that the admin user exists in your database
+
+The admin and regular user login systems are differentiated by:
+- **Admin users**: Have `role: "ADMIN"` in the database and can access `/dashboard`
+- **Regular users**: Have `role: "USER"` and access different areas of the site
+- Both use the same authentication system but are redirected to different areas based on their role
 
 ## 📋 Database Schema
 
