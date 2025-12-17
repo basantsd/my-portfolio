@@ -42,6 +42,16 @@ export default function AdminLoginPage() {
       }
 
       if (result?.ok) {
+        // Fetch session to verify admin role
+        const response = await fetch('/api/auth/session')
+        const session = await response.json()
+
+        if (session?.user?.role !== 'ADMIN') {
+          setError('Access denied. This login is for administrators only.')
+          setIsLoading(false)
+          return
+        }
+
         router.push(callbackUrl)
         router.refresh()
       }

@@ -75,8 +75,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Invalid email or password")
         }
 
-        // Check if email is verified for credential signups (skip for OAuth users)
-        if (!user.emailVerified && user.accounts.length === 0) {
+        // Check if email is verified for credential signups (skip for admin and OAuth users)
+        if (!user.emailVerified && user.role !== "ADMIN") {
           throw new Error("Please verify your email before logging in")
         }
 
@@ -103,10 +103,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true
       }
 
-      // For credentials, check email verification
+      // For credentials, check email verification (skip for admin users)
       const existingUser = await db.user.findUnique({
         where: { email: user.email! },
       })
+
+      // Allow admin users even if email is not verified
+      if (existingUser?.role === "ADMIN") {
+        return true
+      }
 
       if (!existingUser?.emailVerified) {
         return false // Block login if email not verified
